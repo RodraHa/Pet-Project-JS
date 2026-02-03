@@ -2,11 +2,11 @@ import { getPopularRepos, getTotalStars, getUpdatedRepos, getRepos } from "./ind
 
 async function main() {
     const repos = await getRepos();
-    console.log("\n Repos populares");
+    console.log("\n Popular Repositories");
     console.table(getPopularRepos(repos));
-    console.log("\n Repos recientemente actualizados");
+    console.log("\n Recently Updated Repositories");
     console.table(getUpdatedRepos(repos));
-    console.log("\n Total de estrellas:", getTotalStars(repos));
+    console.log("\n Total Stars:", getTotalStars(repos));
 }
 
 main();

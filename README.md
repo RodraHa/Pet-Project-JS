@@ -1,9 +1,9 @@
-## Resultado
+## Result
 
 ![](images/resultado1.png)
 ![](images/resultado2.png)
 
-## Pruebas unitarias
+## Unit Tests
 
 ![](images/unittest.png)
 

@@ -2,8 +2,10 @@ import { Octokit } from "octokit";
 import "dotenv/config";
 
 const octokit = new Octokit({
-  auth: process.env.GITHUB_TOKEN,
+    auth: process.env.GITHUB_TOKEN,
 });
+
+const isPopular = repo => repo.stargazers_count > 5;
 
 export async function getRepos() {
     try {
@@ -17,8 +19,6 @@ export async function getRepos() {
         throw new Error("Error fetching repositories:", error);
     }
 }
-
-const isPopular = repo => repo.stargazers_count > 5;
 
 export const getPopularRepos = repos => {
     if (!repos || repos.length === 0) {
