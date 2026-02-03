@@ -18,12 +18,14 @@ export async function getRepos() {
     }
 }
 
+const isPopular = repo => repo.stargazers_count > 5;
+
 export const getPopularRepos = repos => {
     if (!repos || repos.length === 0) {
         return [];
     }
     return [...repos]
-        .filter(repo => repo.stargazers_count > 5)
+        .filter(isPopular)
         .sort((a, b) => b.stargazers_count - a.stargazers_count)
         .map(repo => ({
             name: repo.name, 
