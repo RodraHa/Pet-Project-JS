@@ -6,16 +6,23 @@ const octokit = new Octokit({
 });
 
 async function getRepos() {
-    return await octokit.paginate('GET /orgs/{org}/repos', {
-        org: 'stackbuilders',
-        per_page: 100,
-        sort: 'updated',
-        direction: 'desc'
-    }); 
+    try {
+        return await octokit.paginate('GET /orgs/{org}/repos', {
+            org: 'stackbuilders',
+            per_page: 100,
+            sort: 'updated',
+            direction: 'desc'
+        }); 
+    } catch (error) {
+        throw new Error("Error fetching repositories:", error);
+    }
 }
 
 export const getPopularRepos = repos => {
-    return repos
+    if (!repos || repos.length === 0) {
+        return [];
+    }
+    return [...repos]
         .filter(repo => repo.stargazers_count > 5)
         .sort((a, b) => b.stargazers_count - a.stargazers_count)
         .map(repo => ({
@@ -25,6 +32,9 @@ export const getPopularRepos = repos => {
 }
 
 export const getUpdatedRepos = repos => {
+    if (!repos || repos.length === 0) {
+        return [];
+    }
     return repos
         .slice(0, 5)
         .map(repo => ({
@@ -34,6 +44,9 @@ export const getUpdatedRepos = repos => {
 }
 
 export const getTotalStars = repos => {
+    if (!repos || repos.length === 0) {
+        return [];
+    }
     return repos.reduce((total, repo) => total + repo.stargazers_count, 0);
 }
 
