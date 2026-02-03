@@ -5,7 +5,7 @@ const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN,
 });
 
-async function getRepos() {
+export async function getRepos() {
     try {
         return await octokit.paginate('GET /orgs/{org}/repos', {
             org: 'stackbuilders',
@@ -35,7 +35,8 @@ export const getUpdatedRepos = repos => {
     if (!repos || repos.length === 0) {
         return [];
     }
-    return repos
+    return [...repos]
+        .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
         .slice(0, 5)
         .map(repo => ({
             name: repo.name, 
@@ -45,18 +46,7 @@ export const getUpdatedRepos = repos => {
 
 export const getTotalStars = repos => {
     if (!repos || repos.length === 0) {
-        return [];
+        return 0;
     }
     return repos.reduce((total, repo) => total + repo.stargazers_count, 0);
 }
-
-async function main() {
-    const repos = await getRepos();
-    console.log("\n Repos populares");
-    console.table(getPopularRepos(repos));
-    console.log("\n Repos recientemente actualizados");
-    console.table(getUpdatedRepos(repos));
-    console.log("\n Total de estrellas:", getTotalStars(repos));
-}
-
-main();
