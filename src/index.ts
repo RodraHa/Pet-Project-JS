@@ -56,7 +56,7 @@ export const getTotalStars = (repos: GitHubRepository[]): number => {
     if (!reposNotEmpty(repos)) {
         return 0;
     }
-    return repos.reduce((total, repo) => total + (repo.stargazers_count ?? 0), 0);
+    return repos.reduce((total, repo) => total + repo.stargazers_count, 0);
 }
 
 export const getReposAlphabetical = (repos: GitHubRepository[]): GitHubRepository[] => {
