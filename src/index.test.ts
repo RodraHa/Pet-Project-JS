@@ -1,4 +1,4 @@
-import { getPopularRepos, getTotalStars, getUpdatedRepos } from "./index.js";
+import { getPopularRepos, getTotalStars, getLatestUpdatedRepos, getReposAlphabetical } from "./index.js";
 import type { GitHubRepository } from "./index.js";
 
 const repos: GitHubRepository[] = [
@@ -25,13 +25,16 @@ describe("GitHub Repository Functions", () => {
         expect(popularRepos.length).toBe(0);
     });
     test("should get the top 5 recently updated repos", () => {
-        const updatedRepos = getUpdatedRepos(repos);
+        const updatedRepos = getLatestUpdatedRepos(repos, 5);
         expect(updatedRepos.length).toBe(5);
-        expect(updatedRepos[0].name).toBe('f');
-        expect(updatedRepos[4].name).toBe('b');
+        expect(updatedRepos.map(repo => repo.name)).toEqual(['f', 'e', 'd', 'c', 'b']);
     });
     test("should return an empty array when no updated repos", () => {
-        const updatedRepos = getUpdatedRepos([]);
+        const updatedRepos = getLatestUpdatedRepos([]);
+        expect(updatedRepos.length).toBe(0);
+    });
+    test("should return an empty array when topN is less than or equal to 0", () => {
+        const updatedRepos = getLatestUpdatedRepos(repos, 0);
         expect(updatedRepos.length).toBe(0);
     });
     test("should get the total stars", () => {
@@ -41,6 +44,14 @@ describe("GitHub Repository Functions", () => {
     test("should return 0 when no repos", () => {
         const totalStars = getTotalStars([]);
         expect(totalStars).toBe(0);
+    });
+    test("should get the repos in alphabetical order", () => {
+        const alphabeticalRepos = getReposAlphabetical(repos);
+        expect(alphabeticalRepos.map(repo => repo.name)).toEqual(['a', 'b', 'c', 'd', 'e', 'f']);
+    });
+    test("should return an empty array when no repos for alphabetical sorting", () => {
+        const alphabeticalRepos = getReposAlphabetical([]);
+        expect(alphabeticalRepos.length).toBe(0);
     });
 });
 

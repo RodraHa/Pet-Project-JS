@@ -2,9 +2,9 @@ import { Octokit } from "octokit";
 import "dotenv/config";
 
 export interface GitHubRepository {
-    name: string;
-    stargazers_count: number;
-    updated_at: string | null;
+    readonly name: string;
+    readonly stargazers_count: number;
+    readonly updated_at: string | null;
 }
 
 const octokit = new Octokit({
@@ -12,6 +12,7 @@ const octokit = new Octokit({
 });
 
 const isPopular = (repo: GitHubRepository) => repo.stargazers_count > 5;
+const reposNotEmpty = (repos: GitHubRepository[]) => repos && repos.length > 0;
 
 export async function getRepos(): Promise<GitHubRepository[]> {
     try {
@@ -34,7 +35,7 @@ export async function getRepos(): Promise<GitHubRepository[]> {
 }
 
 export const getPopularRepos = (repos: GitHubRepository[]): GitHubRepository[] => {
-    if (!repos || repos.length === 0) {
+    if (!reposNotEmpty(repos)) {
         return [];
     }
     return [...repos]
@@ -42,18 +43,25 @@ export const getPopularRepos = (repos: GitHubRepository[]): GitHubRepository[] =
         .sort((a, b) => b.stargazers_count - a.stargazers_count);
 }
 
-export const getUpdatedRepos = (repos: GitHubRepository[]): GitHubRepository[] => {
-    if (!repos || repos.length === 0) {
+export const getLatestUpdatedRepos = (repos: GitHubRepository[], topN: number = 3): GitHubRepository[] => {
+    if (!reposNotEmpty(repos) || topN <= 0) {
         return [];
     }
     return [...repos]
         .sort((a, b) => new Date(b.updated_at ?? 0).getTime() - new Date(a.updated_at ?? 0).getTime())
-        .slice(0, 5);
+        .slice(0, topN);
 }
 
 export const getTotalStars = (repos: GitHubRepository[]): number => {
-    if (!repos || repos.length === 0) {
+    if (!reposNotEmpty(repos)) {
         return 0;
     }
     return repos.reduce((total, repo) => total + (repo.stargazers_count ?? 0), 0);
+}
+
+export const getReposAlphabetical = (repos: GitHubRepository[]): GitHubRepository[] => {
+    if (!reposNotEmpty(repos)) {
+        return [];
+    }
+    return [...repos].sort((a, b) => a.name.localeCompare(b.name));
 }
