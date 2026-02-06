@@ -1,5 +1,8 @@
 import { Octokit } from "octokit";
+import type { Endpoints } from "@octokit/types";
 import "dotenv/config";
+
+type RepoResponse = Endpoints["GET /orgs/{org}/repos"]["response"]["data"][number];
 
 export interface GitHubRepository {
     readonly name: string;
@@ -11,8 +14,13 @@ const octokit = new Octokit({
     auth: process.env.GITHUB_TOKEN,
 });
 
-const isPopular = (repo: GitHubRepository) => repo.stargazers_count > 5;
-const reposNotEmpty = (repos: GitHubRepository[]) => repos && repos.length > 0;
+const isPopular = (repo: GitHubRepository): boolean => repo.stargazers_count > 5;
+const isReposEmpty = (repos: GitHubRepository[]): boolean => repos.length === 0;
+const sortByMostRecentUpdate = (a: GitHubRepository, b: GitHubRepository): number => {
+    const dateA = new Date(a.updated_at ?? 0).getTime();
+    const dateB = new Date(b.updated_at ?? 0).getTime();
+    return dateB - dateA;
+};
 
 export async function getRepos(): Promise<GitHubRepository[]> {
     try {
@@ -21,7 +29,7 @@ export async function getRepos(): Promise<GitHubRepository[]> {
             per_page: 100,
             direction: 'desc'
         }); 
-        return repos.map(repo => ({
+        return repos.map((repo: RepoResponse) => ({
             name: repo.name,
             stargazers_count: repo.stargazers_count ?? 0,
             updated_at: repo.updated_at ?? null,
@@ -35,7 +43,7 @@ export async function getRepos(): Promise<GitHubRepository[]> {
 }
 
 export const getPopularRepos = (repos: GitHubRepository[]): GitHubRepository[] => {
-    if (!reposNotEmpty(repos)) {
+    if (isReposEmpty(repos)) {
         return [];
     }
     return [...repos]
@@ -44,23 +52,23 @@ export const getPopularRepos = (repos: GitHubRepository[]): GitHubRepository[] =
 }
 
 export const getLatestUpdatedRepos = (repos: GitHubRepository[], topN: number = 3): GitHubRepository[] => {
-    if (!reposNotEmpty(repos) || topN <= 0) {
+    if (isReposEmpty(repos) || topN <= 0) {
         return [];
     }
     return [...repos]
-        .sort((a, b) => new Date(b.updated_at ?? 0).getTime() - new Date(a.updated_at ?? 0).getTime())
+        .sort(sortByMostRecentUpdate)
         .slice(0, topN);
 }
 
 export const getTotalStars = (repos: GitHubRepository[]): number => {
-    if (!reposNotEmpty(repos)) {
+    if (isReposEmpty(repos)) {
         return 0;
     }
     return repos.reduce((total, repo) => total + repo.stargazers_count, 0);
 }
 
 export const getReposAlphabetical = (repos: GitHubRepository[]): GitHubRepository[] => {
-    if (!reposNotEmpty(repos)) {
+    if (isReposEmpty(repos)) {
         return [];
     }
     return [...repos].sort((a, b) => a.name.localeCompare(b.name));
