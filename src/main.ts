@@ -13,4 +13,4 @@ async function main() {
     console.table(getReposAlphabetical(repos).filter(repo => !repo.name.toLowerCase().startsWith('h')));
 }
 
-main();
+await main();
